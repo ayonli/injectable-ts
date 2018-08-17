@@ -6,40 +6,40 @@ import "reflect-metadata";
  * but only depends on the type definition itself.
  */
 namespace DI {
-    const CONTAINER = {
-        Classes: new Set,
-        initials: new Map,
-        props: new Map,
+    const Container = {
+        classes: new Set<Function>(),
+        initials: new Map<Function, any[]>(),
+        props: new Map<Function, { [prop: string]: Function}>(),
     };
 
     /**
      * Sets the class to be injectable as a dependency.
      * @param initials The initial data passed to the class constructor.
      */
-    export function injectable(initials?: any[]): (constructor: Function) => void;
-    export function injectable(constructor: Function, initials?: any[]): void;
+    export function injectable<T>(initials?: any[]): (constructor: T) => void;
+    export function injectable<T>(constructor: T, initials?: any[]): void;
     export function injectable(...args): any {
         if (typeof args[0] == "function") { // signature 2
-            CONTAINER.Classes.add(args[0]);
+            Container.classes.add(args[0]);
 
             if (args[1])
-                CONTAINER.initials.set(args[0], args[1]);
+                Container.initials.set(args[0], args[1]);
         } else { // signature 1
             return function (constructor: Function) {
                 injectable(constructor);
-                CONTAINER.initials.set(constructor, args[0]);
+                Container.initials.set(constructor, args[0]);
             }
         }
     }
 
     /** Sets the property to be dependent to it's type. */
     export function injected(proto: any, prop: string): void {
-        let type: any = Reflect.getOwnMetadata("design:type", proto, prop);
+        let type: Function = Reflect.getOwnMetadata("design:type", proto, prop);
 
-        if (CONTAINER.Classes.has(type)) {
-            let props = CONTAINER.props.get(proto.constructor) || {};
+        if (Container.classes.has(type)) {
+            let props = Container.props.get(proto.constructor) || {};
             props[prop] = type;
-            CONTAINER.props.set(proto.constructor, props);
+            Container.props.set(proto.constructor, props);
         }
     }
 
@@ -56,13 +56,13 @@ namespace DI {
             // it's signature, and try to inject dependencies accordingly, if a 
             // parameter doesn't have dependency, or the dependency can not be 
             // found, then pass `undefined`.
-            let initials: any[] = CONTAINER.initials.get(constructor) || [],
+            let initials: any[] = Container.initials.get(constructor) || [],
                 paramTypes: any[] = Reflect.getOwnMetadata("design:paramtypes", constructor) || initials,
                 params: any[] = [];
 
             if (paramTypes.length) {
                 for (let i in paramTypes) {
-                    if (CONTAINER.Classes.has(paramTypes[i])) {
+                    if (Container.classes.has(paramTypes[i])) {
                         params[i] = getInstance(paramTypes[i]);
                     } else if (initials) {
                         params[i] = initials[i];
@@ -75,14 +75,14 @@ namespace DI {
             instance = Object.create(constructor.prototype);
             constructor.apply(instance, params);
         } else {
-            instance = new (<any>constructor);
+            instance = new constructor();
         }
 
-        let props = CONTAINER.props.get(constructor) || {};
+        let props = Container.props.get(constructor) || {};
 
         for (let x in props) {
-            if (CONTAINER.Classes.has(props[x])) {
-                instance[x] = getInstance(props[x]);
+            if (Container.classes.has(props[x])) {
+                instance[x] = getInstance(<any>props[x]);
             } else {
                 instance[x] = undefined;
             }

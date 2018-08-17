@@ -73,13 +73,7 @@ class D {
     @injected
     a: A;
 
-    b: B;
-    c: C;
-
-    constructor(b: B, c: C) {
-        this.b = b;
-        this.c = c;
-    }
+    constructor(public b: B, public c: C) { }
 } 
 
 var d = getInstance(D);
