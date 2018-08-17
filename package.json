@@ -1,0 +1,33 @@
+{
+    "name": "injectable-ts",
+    "version": "0.1.0",
+    "description": "The simplest Dependency Injection framework for TypeScript.",
+    "main": "dist/index.js",
+    "types": "src/index.ts",
+    "scripts": {
+        "test": "node dist/test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hyurl/injectable-ts.git"
+    },
+    "keywords": [
+        "typescript",
+        "ts",
+        "\"dependency",
+        "injection\""
+    ],
+    "author": "Ayon Lee <i@hyurl.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/hyurl/injectable-ts/issues"
+    },
+    "homepage": "https://github.com/hyurl/injectable-ts#readme",
+    "dependencies": {
+        "@types/node": "^10.7.1",
+        "reflect-metadata": "^0.1.12"
+    },
+    "devDependencies": {
+        "tslib": "^1.9.3"
+    }
+}
