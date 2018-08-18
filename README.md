@@ -1,17 +1,17 @@
 # Injectable-TS
 
-**The simplest Dependency Injection framework for TypeScript.**
+**The simplest way of Dependency Injection for TypeScript.**
 
 This package doesn't require setting the dependency class to any function,
 but only depends on the type definition itself.
 
-# Install
+## Install
 
 ```sh
 npm i injectable-ts
 ```
 
-# Usage
+## Usage
 
 To turn on Dependency Injection Support, you need to set the following options
 in `tsconfig.json` to `true`:
@@ -35,14 +35,12 @@ import * as assert from "assert";
 // the are only three new keywords in the this package.
 import { injectable, injected, getInstance } from "./index";
 
-@injectable(["ABC"]) // sets the class to be injectable and pass initial data.
+@injectable // sets the class to be injectable.
 class A {
     str: string;
-    str2: string;
 
     // initial data can be set in parameter as well, just like what you would do:
-    // constructor (str: string = "ABC")
-    constructor (str: string) {
+    constructor(str: string = "ABC") {
         this.str = str;
     }
 }
@@ -67,8 +65,8 @@ class C {
 }
 
 @injectable
-// using both constructor dependencies and `injected` are supported, but DO NOT
-// set them to the same property. 
+// using both constructor injection and `injected` on property are supported, 
+// but DO NOT set them to the same property. 
 class D {
     @injected
     a: A;
@@ -85,7 +83,6 @@ assert.ok(d.c instanceof C);
 assert.ok(d.c.b instanceof B);
 assert.ok(d.c.b.a instanceof A);
 assert.ok(d.c.b.a.str == "ABC");
-assert.ok(d.c.b.a.str2 === undefined);
 
 class E {
     str: string;
@@ -114,3 +111,52 @@ assert.ok(f.e.str == "ABC");
 
 console.log("#### OK ####"); // will output #### OK ####
 ```
+
+## More About Initial Data
+
+When you pass initial data to `injectable()`, the order should be equal to the 
+constructor's parameters, if the corresponding parameter doesn't have initial 
+data, then `undefined` should be passed. Initial data should remain dependencies
+`undefined` because they will always be injected with dependency instances, 
+unless the dependency could not be found.
+
+Although you are allowed to set initial data by passing them to `injectable()`, 
+but it's not a recommended way, since you already can set them in the 
+constructor definition. But, if you want to make those classes that are not 
+decorated with `@injectable`, say a class from a third party package, injectable,
+it would be very useful to use `injectable()` with initial data to do so.
+
+```typescript
+// The way to set dafault data in this class is recommended.
+@injectable
+class A {
+    str: string; // or juest set here
+
+    constructor(str = "initial string") {
+        this.str = str;
+    }
+}
+
+// But the way in this class is not recommended, although works the same.
+@injectable(["initial string"])
+class B {
+    str: string;
+
+    constructor(str) {
+        this.str = str;
+    }
+}
+```
+
+## Difference Between Constructor Injection And Property Injection
+
+The dependencies in the constructor parameters are injected at the same time of 
+instantiation, that means you can use them in the constructor body. But the 
+dependency defined on the property will be not, they will be injected after the 
+instantiation is finished, which means you can't use them in the constructor 
+body.
+
+## Inheritance Support
+
+If a class is decorated with `@injectable`, then itself and it's offspring are 
+all injectable to other classes. Please check the [example](./example-inheritance/index.ts).

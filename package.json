@@ -1,11 +1,18 @@
 {
     "name": "injectable-ts",
     "version": "0.1.0",
-    "description": "The simplest Dependency Injection framework for TypeScript.",
+    "description": "The simplest way of Dependency Injection for TypeScript.",
     "main": "dist/index.js",
     "types": "src/index.ts",
     "scripts": {
-        "test": "node dist/example"
+        "compile": "tsc && npm run compile-example && npm run compile-example-es5 && npm run compile-example-inheritance",
+        "compile-example": "tsc -p example",
+        "compile-example-es5": "tsc -p example-es5",
+        "compile-example-inheritance": "tsc -p example-inheritance",
+        "test": "node example && node example-es5 && node example-inheritance"
+    },
+    "engines": {
+        "node": ">=4"
     },
     "repository": {
         "type": "git",
@@ -28,6 +35,7 @@
         "reflect-metadata": "^0.1.12"
     },
     "devDependencies": {
+        "source-map-support": "^0.5.8",
         "tslib": "^1.9.3"
     }
 }

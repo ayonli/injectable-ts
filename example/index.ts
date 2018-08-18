@@ -1,6 +1,7 @@
+import "source-map-support/register";
 import * as assert from "assert";
-// the are only three new keywords in the this package.
-import { injectable, injected, getInstance } from "./index";
+// The are only three new keywords in the this package.
+const { injectable, injected, getInstance } = require("..");
 
 @injectable(["ABC"]) // sets the class to be injectable and pass initial data.
 class A {
@@ -9,7 +10,8 @@ class A {
 
     // initial data can be set in parameter as well, just like what you would do:
     // constructor (str: string = "ABC")
-    constructor (str: string) {
+    // in fact, setting initial data in the constructor is recommended.
+    constructor(str: string) {
         this.str = str;
     }
 }
@@ -34,14 +36,14 @@ class C {
 }
 
 @injectable
-// using both constructor dependencies and `injected` are supported, but DO NOT
-// set them to the same property. 
+// using both constructor injection and `injected` on property are supported, 
+// but DO NOT set them to the same property.
 class D {
     @injected
     a: A;
 
     constructor(public b: B, public c: C) { }
-} 
+}
 
 var d = getInstance(D);
 
@@ -57,7 +59,7 @@ assert.ok(d.c.b.a.str2 === undefined);
 class E {
     str: string;
 
-    constructor(str: string) {
+    constructor(str: string, public str2 = "CDA") {
         this.str = str;
     }
 }
@@ -78,5 +80,6 @@ var f = getInstance(F);
 assert.ok(f instanceof F);
 assert.ok(f.e instanceof E);
 assert.ok(f.e.str == "ABC");
+assert.ok(f.e.str2 == "CDA");
 
 console.log("#### OK ####"); // will output #### OK ####

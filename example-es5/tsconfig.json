@@ -3,8 +3,6 @@
         "module": "commonjs",
         "target": "es5",
         "preserveConstEnums": true,
-        "rootDir": "src",
-        "outDir": "dist",
         "newLine": "LF",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -17,8 +15,5 @@
         "lib": [
             "es2015"
         ]
-    },
-    "files": [
-        "src/index.ts",
-    ]
+    }
 }
