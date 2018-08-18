@@ -1,5 +1,3 @@
-"use strict";
-
 import "source-map-support/register";
 import * as assert from "assert";
 // The are only three new keywords in the this package.

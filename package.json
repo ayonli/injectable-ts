@@ -9,7 +9,7 @@
         "compile-example": "tsc -p example",
         "compile-example-es5": "tsc -p example-es5",
         "compile-example-inheritance": "tsc -p example-inheritance",
-        "test": "node example && node example-es5 && node example-inheritance"
+        "test": "node test"
     },
     "engines": {
         "node": ">=4"
