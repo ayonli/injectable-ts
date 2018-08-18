@@ -13,7 +13,8 @@ namespace DI {
     interface Class extends Function {
         [__injectable]?: boolean;
         [__defaults]?: any[];
-        [__dependencies]?: { [prop: string]: Class }
+        [__dependencies]?: { [prop: string]: Class };
+        init?(...args: any[]): this | void;
     }
 
     /**
@@ -22,29 +23,46 @@ namespace DI {
      */
     export function injectable<T>(defaults?: any[]): (Class: T) => void;
     export function injectable<T>(Class: T, defaults?: any[]): void;
-    export function injectable(...args): any {
+    export function injectable(): any {
+        let args = arguments;
         if (typeof args[0] == "function") { // signature 2
-            args[0][__injectable] = true;
+            let Class: Class = args[0];
+            Class[__injectable] = true;
 
             if (args[1])
-                args[0][__defaults] = args[1];
+                Class[__defaults] = args[1];
         } else { // signature 1
-            return function (Class: Class) {
-                Class[__injectable] = true;
-                Class[__defaults] = args[0];
-            }
+            return (Class: Class) => injectable(Class, args[0]);
         }
     }
 
     /** Sets the property to be dependent to it's type. */
-    export function injected(proto: any, prop: string): void {
-        let Class: Class = Reflect.getOwnMetadata("design:type", proto, prop);
+    export function injected(proto: any, prop: string, desc?: PropertyDescriptor): void {
+        let Type: Class = Reflect.getOwnMetadata("design:type", proto, prop);
 
-        if (typeof Class == "function" && Class[__injectable]) {
-            let dependencies = proto.constructor[__dependencies] || {};
-            dependencies[prop] = Class;
-            proto.constructor[__dependencies] = dependencies;
+        if (!desc && typeof Type == "function" && Type[__injectable]) {
+            let Class = proto.constructor,
+                dependencies = Class[__dependencies] || {};
+
+            dependencies[prop] = Type;
+            Class[__dependencies] = dependencies;
         }
+    }
+
+    function getArgs(paramTypes: any[], defaults?: any[]) {
+        let args: any[] = [];
+
+        for (let i in paramTypes) {
+            if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
+                args[i] = getInstance(paramTypes[i]);
+            } else if (defaults && defaults[i]) {
+                args[i] = defaults[i];
+            } else {
+                args[i] = undefined;
+            }
+        }
+
+        return args;
     }
 
     /**
@@ -52,27 +70,16 @@ namespace DI {
      * automatically and recursively.
      * @param Class The class you want to get instance of.
      */
-    export function getInstance<T>(Class: new (...args) => T): T {
+    export function getInstance<T extends Class>(Class: new (...args) => T): T {
         let instance: T = null;
 
         // The program will lookup constructor signature, and try to inject 
         // dependencies accordingly, if a parameter doesn't have dependency, or
         // the dependency can not be found, then `undefined` will be passed.
-        let defaults: any[] = Class.hasOwnProperty(__defaults) ? Class[__defaults] : [],
-            paramTypes: any[] = Reflect.getOwnMetadata("design:paramtypes", Class) || defaults,
-            args: any[] = [];
+        let defaults: any[] = Class[__defaults] || [],
+            paramTypes: any[] = Reflect.getMetadata("design:paramtypes", Class);
 
-        for (let i in paramTypes) {
-            if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
-                args[i] = getInstance(paramTypes[i]);
-            } else if (defaults[i]) {
-                args[i] = defaults[i];
-            } else {
-                args[i] = undefined;
-            }
-        }
-
-        instance = new Class(...args);
+        instance = new Class(...getArgs(paramTypes || defaults, defaults));
 
         let dependencies = Class[__dependencies] || {};
 
@@ -82,6 +89,11 @@ namespace DI {
             } else {
                 instance[x] = undefined;
             }
+        }
+
+        if (typeof instance.init == "function") {
+            let paramTypes: any[] = Reflect.getMetadata("design:paramtypes", Class.prototype, "init");
+            instance.init(...getArgs(paramTypes || []));
         }
 
         return instance;

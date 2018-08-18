@@ -107,7 +107,8 @@ assert.equal(myVihicle.truck.name, "Truck");
 assert.ok(myVihicle.truck.wheel instanceof Wheel);
 assert.equal(myVihicle.truck.wheel.count, 6);
 assert.ok(myVihicle.unknown instanceof Unknown);
-assert.ok(myVihicle.unknown.name === undefined);
-assert.ok(myVihicle.unknown.wheel === undefined);
+assert.equal(myVihicle.unknown.name, undefined);
+assert.ok(myVihicle.unknown.wheel instanceof Wheel);
+assert.equal(myVihicle.unknown.wheel.count, 4);
 console.log("#### OK ####");
 //# sourceMappingURL=index.js.map

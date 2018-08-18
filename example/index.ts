@@ -20,7 +20,7 @@ class A {
 class B {
     a: A;
 
-    // because this class has its own constructor, so its paramter will be 
+    // because this class has its own constructor, so its parameter will be 
     // auto injected  with required dependency.
     constructor(a: A) {
         this.a = a;
@@ -65,7 +65,7 @@ class E {
 }
 
 // calling `injectable` as a function and passing the class will be very useful 
-// to make privious written code (or  third party packages) injectable.
+// to make previous written code (or  third party packages) injectable.
 injectable(E, ["ABC"]);
 
 // even if you don't set this class injectable, it still cound be used by 

@@ -5,10 +5,7 @@
     "main": "dist/index.js",
     "types": "src/index.ts",
     "scripts": {
-        "compile": "tsc && npm run compile-example && npm run compile-example-es5 && npm run compile-example-inheritance",
-        "compile-example": "tsc -p example",
-        "compile-example-es5": "tsc -p example-es5",
-        "compile-example-inheritance": "tsc -p example-inheritance",
+        "compile": "tsc && tsc -p example && tsc -p example-es5 && tsc -p example-inheritance && tsc -p example-init",
         "test": "node test"
     },
     "engines": {

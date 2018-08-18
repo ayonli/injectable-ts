@@ -6,47 +6,46 @@ var DI;
     var __defaults = Symbol("__defaults");
     var __dependencies = Symbol("__dependencies");
     function injectable() {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+        var args = arguments;
         if (typeof args[0] == "function") {
-            args[0][__injectable] = true;
+            var Class = args[0];
+            Class[__injectable] = true;
             if (args[1])
-                args[0][__defaults] = args[1];
+                Class[__defaults] = args[1];
         }
         else {
-            return function (Class) {
-                Class[__injectable] = true;
-                Class[__defaults] = args[0];
-            };
+            return function (Class) { return injectable(Class, args[0]); };
         }
     }
     DI.injectable = injectable;
-    function injected(proto, prop) {
-        var Class = Reflect.getOwnMetadata("design:type", proto, prop);
-        if (typeof Class == "function" && Class[__injectable]) {
-            var dependencies = proto.constructor[__dependencies] || {};
-            dependencies[prop] = Class;
-            proto.constructor[__dependencies] = dependencies;
+    function injected(proto, prop, desc) {
+        var Type = Reflect.getOwnMetadata("design:type", proto, prop);
+        if (!desc && typeof Type == "function" && Type[__injectable]) {
+            var Class = proto.constructor, dependencies = Class[__dependencies] || {};
+            dependencies[prop] = Type;
+            Class[__dependencies] = dependencies;
         }
     }
     DI.injected = injected;
-    function getInstance(Class) {
-        var instance = null;
-        var defaults = Class.hasOwnProperty(__defaults) ? Class[__defaults] : [], paramTypes = Reflect.getOwnMetadata("design:paramtypes", Class) || defaults, args = [];
+    function getArgs(paramTypes, defaults) {
+        var args = [];
         for (var i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
             }
-            else if (defaults[i]) {
+            else if (defaults && defaults[i]) {
                 args[i] = defaults[i];
             }
             else {
                 args[i] = undefined;
             }
         }
-        instance = new (Class.bind.apply(Class, [void 0].concat(args)))();
+        return args;
+    }
+    function getInstance(Class) {
+        var instance = null;
+        var defaults = Class[__defaults] || [], paramTypes = Reflect.getMetadata("design:paramtypes", Class);
+        instance = new (Class.bind.apply(Class, [void 0].concat(getArgs(paramTypes || defaults, defaults))))();
         var dependencies = Class[__dependencies] || {};
         for (var x in dependencies) {
             if (dependencies[x][__injectable]) {
@@ -55,6 +54,10 @@ var DI;
             else {
                 instance[x] = undefined;
             }
+        }
+        if (typeof instance.init == "function") {
+            var paramTypes_1 = Reflect.getMetadata("design:paramtypes", Class.prototype, "init");
+            instance.init.apply(instance, getArgs(paramTypes_1 || []));
         }
         return instance;
     }

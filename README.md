@@ -137,7 +137,9 @@ class A {
     }
 }
 
-// But the way in this class is not recommended, although works the same.
+// But the way in this class is not recommended, although it works the same in 
+// most situations. Except with inheritance, which may cause problem if the 
+// child class doesn't accept the same parameter types as the super class do.
 @injectable(["default string"])
 class B {
     str: string;
@@ -160,3 +162,11 @@ body.
 
 If a class is decorated with `@injectable`, then itself and it's offspring are 
 all injectable to other classes. Please check the [example](./example-inheritance/index.ts).
+
+## Additional `init()` Method
+
+A injectable class may have a method `init()` for special use, if such a method 
+is present, then it will be called after the instantiation is complete and 
+before `getInstance()` returning the instance, so you can do some initial stuffs
+in it. The `init()` method also support dependency injection just like the 
+constructor. Please check the [example](./example-init/index.ts).
