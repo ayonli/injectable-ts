@@ -1,6 +1,7 @@
 // This package support classes written in ES5 style, which is a `function`,
 // the following classes will be compiled to `ES5` standard, and the assertions 
 // should pass.
+"use strict";
 
 import "source-map-support/register";
 import * as assert from "assert";

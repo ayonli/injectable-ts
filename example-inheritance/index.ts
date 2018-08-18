@@ -4,6 +4,7 @@
 // if there is no decorator in a class, so the bellowing classes without 
 // `@injectable` will be decorated `@meta`, which does nothing but just trigger 
 // `tsc` to record metadata of the class.
+"use strict";
 
 import "source-map-support/register";
 import * as assert from "assert";
