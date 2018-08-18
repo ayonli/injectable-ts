@@ -39,7 +39,7 @@ import { injectable, injected, getInstance } from "./index";
 class A {
     str: string;
 
-    // initial data can be set in parameter as well, just like what you would do:
+    // default data can be set in parameter as well, just like what you would do:
     constructor(str: string = "ABC") {
         this.str = str;
     }
@@ -112,19 +112,19 @@ assert.ok(f.e.str == "ABC");
 console.log("#### OK ####"); // will output #### OK ####
 ```
 
-## More About Initial Data
+## More About Default Data
 
-When you pass initial data to `injectable()`, the order should be equal to the 
-constructor's parameters, if the corresponding parameter doesn't have initial 
-data, then `undefined` should be passed. Initial data should remain dependencies
+When you pass default data to `injectable()`, the order should be equal to the 
+constructor's parameters, if the corresponding parameter doesn't have default 
+data, then `undefined` should be passed. Default data should remain dependencies
 `undefined` because they will always be injected with dependency instances, 
 unless the dependency could not be found.
 
-Although you are allowed to set initial data by passing them to `injectable()`, 
+Although you are allowed to set default data by passing them to `injectable()`, 
 but it's not a recommended way, since you already can set them in the 
 constructor definition. But, if you want to make those classes that are not 
 decorated with `@injectable`, say a class from a third party package, injectable,
-it would be very useful to use `injectable()` with initial data to do so.
+it would be very useful to use `injectable()` with default data to do so.
 
 ```typescript
 // The way to set dafault data in this class is recommended.
@@ -132,13 +132,13 @@ it would be very useful to use `injectable()` with initial data to do so.
 class A {
     str: string; // or juest set here
 
-    constructor(str = "initial string") {
+    constructor(str = "default string") {
         this.str = str;
     }
 }
 
 // But the way in this class is not recommended, although works the same.
-@injectable(["initial string"])
+@injectable(["default string"])
 class B {
     str: string;
 

@@ -3,14 +3,14 @@ import * as assert from "assert";
 // The are only three new keywords in the this package.
 const { injectable, injected, getInstance } = require("..");
 
-@injectable(["ABC"]) // sets the class to be injectable and pass initial data.
+@injectable(["ABC"]) // sets the class to be injectable and pass default data.
 class A {
     str: string;
     str2: string;
 
-    // initial data can be set in parameter as well, just like what you would do:
+    // default data can be set in parameter as well, just like what you would do:
     // constructor (str: string = "ABC")
-    // in fact, setting initial data in the constructor is recommended.
+    // in fact, setting default data in the constructor is recommended.
     constructor(str: string) {
         this.str = str;
     }

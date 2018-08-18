@@ -7,31 +7,31 @@ import "reflect-metadata";
  */
 namespace DI {
     const __injectable = Symbol("__injectable");
-    const __initials = Symbol("__initials");
+    const __defaults = Symbol("__defaults");
     const __dependencies = Symbol("__dependencies");
 
     interface Class extends Function {
         [__injectable]?: boolean;
-        [__initials]?: any[];
+        [__defaults]?: any[];
         [__dependencies]?: { [prop: string]: Class }
     }
 
     /**
      * Sets the class to be injectable as a dependency.
-     * @param initials The initial data passed to the class Class.
+     * @param defaults The default data passed to the class Class.
      */
-    export function injectable<T>(initials?: any[]): (Class: T) => void;
-    export function injectable<T>(Class: T, initials?: any[]): void;
+    export function injectable<T>(defaults?: any[]): (Class: T) => void;
+    export function injectable<T>(Class: T, defaults?: any[]): void;
     export function injectable(...args): any {
         if (typeof args[0] == "function") { // signature 2
             args[0][__injectable] = true;
 
             if (args[1])
-                args[0][__initials] = args[1];
+                args[0][__defaults] = args[1];
         } else { // signature 1
             return function (Class: Class) {
                 Class[__injectable] = true;
-                Class[__initials] = args[0];
+                Class[__defaults] = args[0];
             }
         }
     }
@@ -58,15 +58,15 @@ namespace DI {
         // The program will lookup constructor signature, and try to inject 
         // dependencies accordingly, if a parameter doesn't have dependency, or
         // the dependency can not be found, then `undefined` will be passed.
-        let initials: any[] = Class.hasOwnProperty(__initials) ? Class[__initials] : [],
-            paramTypes: any[] = Reflect.getOwnMetadata("design:paramtypes", Class) || initials,
+        let defaults: any[] = Class.hasOwnProperty(__defaults) ? Class[__defaults] : [],
+            paramTypes: any[] = Reflect.getOwnMetadata("design:paramtypes", Class) || defaults,
             args: any[] = [];
 
         for (let i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
-            } else if (initials[i]) {
-                args[i] = initials[i];
+            } else if (defaults[i]) {
+                args[i] = defaults[i];
             } else {
                 args[i] = undefined;
             }

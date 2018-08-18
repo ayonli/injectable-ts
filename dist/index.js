@@ -3,7 +3,7 @@ require("reflect-metadata");
 var DI;
 (function (DI) {
     var __injectable = Symbol("__injectable");
-    var __initials = Symbol("__initials");
+    var __defaults = Symbol("__defaults");
     var __dependencies = Symbol("__dependencies");
     function injectable() {
         var args = [];
@@ -13,12 +13,12 @@ var DI;
         if (typeof args[0] == "function") {
             args[0][__injectable] = true;
             if (args[1])
-                args[0][__initials] = args[1];
+                args[0][__defaults] = args[1];
         }
         else {
             return function (Class) {
                 Class[__injectable] = true;
-                Class[__initials] = args[0];
+                Class[__defaults] = args[0];
             };
         }
     }
@@ -34,13 +34,13 @@ var DI;
     DI.injected = injected;
     function getInstance(Class) {
         var instance = null;
-        var initials = Class.hasOwnProperty(__initials) ? Class[__initials] : [], paramTypes = Reflect.getOwnMetadata("design:paramtypes", Class) || initials, args = [];
+        var defaults = Class.hasOwnProperty(__defaults) ? Class[__defaults] : [], paramTypes = Reflect.getOwnMetadata("design:paramtypes", Class) || defaults, args = [];
         for (var i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
             }
-            else if (initials[i]) {
-                args[i] = initials[i];
+            else if (defaults[i]) {
+                args[i] = defaults[i];
             }
             else {
                 args[i] = undefined;
