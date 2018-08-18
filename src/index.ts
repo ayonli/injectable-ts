@@ -11,9 +11,9 @@ namespace DI {
     const __dependencies = Symbol("__dependencies");
 
     interface Class extends Function {
-        [__injectable]: boolean;
-        [__initials]: any[];
-        [__dependencies]: { [prop: string]: Class }
+        [__injectable]?: boolean;
+        [__initials]?: any[];
+        [__dependencies]?: { [prop: string]: Class }
     }
 
     /**
