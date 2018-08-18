@@ -96,4 +96,28 @@ assert.equal(myVihicle.unknown.name, undefined);
 assert.ok(myVihicle.unknown.wheel instanceof Wheel);
 assert.equal(myVihicle.unknown.wheel.count, 4);
 
+// Another way of inheritance is to directly extends the base class `Injectable`
+const { Injectable } = require("..");
+
+class Train extends Injectable {}
+
+class Subway extends Injectable {}
+
+class Transportation extends Injectable {
+    @injected
+    train: Train;
+
+    @injected
+    subway: Subway;
+}
+
+var transportation: Transportation = Transportation.getInstance();
+
+assert.ok(transportation instanceof Transportation);
+assert.ok(transportation.train instanceof Train);
+assert.ok(transportation.subway instanceof Subway);
+assert.strictEqual(transportation.train.dependent, transportation);
+assert.strictEqual(transportation.subway.dependent, transportation);
+
+
 console.log("#### OK ####");

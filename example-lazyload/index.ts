@@ -4,10 +4,7 @@
 
 import "source-map-support/register";
 import * as assert from "assert";
-var DI = require("..");
-var injectable = DI.injectable;
-var injected = DI.injected;
-var getInstance = DI.getInstance;
+const { injectable, injected, getInstance } = require("..");
 
 var logs = [];
 var log1 = "The engine is started!";
@@ -34,15 +31,18 @@ class Car {
     @injected
     wheel: Wheel;
 
-    start() {
+    constructor() {
         this.engine.start();
         this.wheel.run();
     }
 }
 
-var car = getInstance(Car);
-car.start();
+var car1 = getInstance(Car);
 
 assert.deepStrictEqual(logs, [log1, log2]);
+
+var car2 = new Car;
+assert.ok(car2.engine instanceof Engine);
+assert.notStrictEqual(car2.engine, car1.engine);
 
 console.log("#### OK ####");

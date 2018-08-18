@@ -110,5 +110,26 @@ assert.ok(myVihicle.unknown instanceof Unknown);
 assert.equal(myVihicle.unknown.name, undefined);
 assert.ok(myVihicle.unknown.wheel instanceof Wheel);
 assert.equal(myVihicle.unknown.wheel.count, 4);
+const { Injectable } = require("..");
+class Train extends Injectable {
+}
+class Subway extends Injectable {
+}
+class Transportation extends Injectable {
+}
+tslib_1.__decorate([
+    injected,
+    tslib_1.__metadata("design:type", Train)
+], Transportation.prototype, "train", void 0);
+tslib_1.__decorate([
+    injected,
+    tslib_1.__metadata("design:type", Subway)
+], Transportation.prototype, "subway", void 0);
+var transportation = Transportation.getInstance();
+assert.ok(transportation instanceof Transportation);
+assert.ok(transportation.train instanceof Train);
+assert.ok(transportation.subway instanceof Subway);
+assert.strictEqual(transportation.train.dependent, transportation);
+assert.strictEqual(transportation.subway.dependent, transportation);
 console.log("#### OK ####");
 //# sourceMappingURL=index.js.map

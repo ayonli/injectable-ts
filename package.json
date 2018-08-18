@@ -1,11 +1,11 @@
 {
     "name": "injectable-ts",
-    "version": "0.1.3",
+    "version": "0.2.0",
     "description": "The simplest way of Dependency Injection for TypeScript.",
     "main": "dist/index.js",
     "types": "src/index.ts",
     "scripts": {
-        "compile": "tsc && tsc -p example && tsc -p example-es5 && tsc -p example-inheritance && tsc -p example-init",
+        "compile": "tsc && tsc -p example && tsc -p example-inheritance && tsc -p example-lazyload",
         "test": "node test"
     },
     "engines": {

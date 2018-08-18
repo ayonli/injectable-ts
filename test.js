@@ -1,6 +1,5 @@
-var isNode6 = parseInt(process.version.slice(1)) >= 6;
+var isOldNode = parseInt(process.version.slice(1)) < 6;
 
-if (isNode6) require("./example");
-require("./example-es5");
-if (isNode6) require("./example-inheritance");
-if (isNode6) require("./example-init");
+require("./example");
+if (!isOldNode) require("./example-inheritance");
+if (!isOldNode) require("./example-lazyload");

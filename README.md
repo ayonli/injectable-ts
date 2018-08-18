@@ -152,21 +152,19 @@ class B {
 
 ## Difference Between Constructor Injection And Property Injection
 
-The dependencies in the constructor parameters are injected at the same time of 
-instantiation, that means you can use them in the constructor body. But the 
-dependency defined on the property will be not, they will be injected after the 
-instantiation is finished, which means you can't use them in the constructor 
-body.
+The dependencies in the constructor parameters are injected at the very time of 
+instantiation, but the dependency defined on the property is not, they will be 
+lazy-load, which means only if you call them, otherwise they will not be 
+injected. Both these dependencies are available in the constructor and any where
+inside or outside (must be `public`) the class. 
+Please check the [example](./example-lazyload/index.ts).
 
 ## Inheritance Support
 
-If a class is decorated with `@injectable`, then itself and it's offspring are 
-all injectable to other classes. Please check the [example](./example-inheritance/index.ts).
+If a class is decorated with `@injectable`, or it extends the base class 
+`Injectable`, then itself and it's offspring are all injectable to other 
+classes. Please check the [example](./example-inheritance/index.ts).
 
-## Additional `init()` Method
-
-A injectable class may have a method `init()` for special use, if such a method 
-is present, then it will be called after the instantiation is complete and 
-before `getInstance()` returning the instance, so you can do some initial stuffs
-in it. The `init()` method also support dependency injection just like the 
-constructor. Please check the [example](./example-init/index.ts).
+Any injectable class, when injected to a instance, it will carry a read-only 
+property `dependent`, which reference to the that instance, so you can always 
+know the current instance has been injected into what dependent target.
