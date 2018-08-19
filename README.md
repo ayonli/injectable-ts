@@ -32,7 +32,7 @@ Then you can use the functions in your project:
 
 ```typescript
 import * as assert from "assert";
-// the are only three new keywords in the this package.
+// There are only three main functions in the the package.
 import { injectable, injected, getInstance } from "injectable-ts";
 
 @injectable // Set the class to be injectable
@@ -144,6 +144,13 @@ assert.equal(f.e.str2, "CDA");
 
 console.log("#### OK ####"); // will output #### OK ####
 ```
+
+## Injection With Abstract Classes And Interfaces
+
+By default, when using `@injected` to decorate a property (or parameter), it 
+assumes the corresponding type is instantiable, which means it's not suitable
+for abstract classes and interfaces, so you have to use another function 
+`inject()`. Please check the [example](./example-abstract/index.ts).
 
 ## Difference Between Constructor Injection And Property Injection
 

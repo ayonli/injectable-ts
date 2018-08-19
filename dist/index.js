@@ -11,6 +11,7 @@ var DI;
     var __injectable = Symbol("__injectable");
     var __defaults = Symbol("__defaults");
     var __dependent = Symbol("__dependent");
+    var __paramTypes = Symbol("__paramTypes");
     var __paramData = Symbol("__paramData");
     var Injectable = (function () {
         function Injectable() {
@@ -53,17 +54,19 @@ var DI;
         }
     }
     DI.injectable = injectable;
-    function injected() {
-        var args = arguments;
-        if (args.length >= 2) {
-            var proto = args[0], prop = args[1], data_1 = args[2], Type_1 = Reflect.getOwnMetadata("design:type", proto, prop);
-            if (typeof Type_1 == "function" && Type_1[__injectable]) {
+    function inject(Class, data) {
+        return function (target, prop, paramIndex) {
+            if (typeof Class != "function")
+                throw new TypeError("The dependency must be a class.");
+            else if (!Class[__injectable])
+                throw new TypeError("The given class is not injectable.");
+            if (prop && paramIndex === undefined) {
                 var _prop_1 = Symbol(prop);
-                Object.defineProperty(proto, prop, {
+                Object.defineProperty(target, prop, {
                     enumerable: true,
                     get: function () {
                         if (!this[_prop_1])
-                            this[_prop_1] = getInstance.call(this, Type_1, data_1);
+                            this[_prop_1] = getInstance.call(this, Class, data);
                         return this[_prop_1];
                     },
                     set: function (instance) {
@@ -71,6 +74,20 @@ var DI;
                     }
                 });
             }
+            else if (!prop && paramIndex !== undefined) {
+                target[__paramTypes] = target[__paramTypes] || [];
+                target[__paramTypes][paramIndex] = Class;
+                target[__paramData] = target[__paramData] || [];
+                target[__paramData][paramIndex] = data;
+            }
+        };
+    }
+    DI.inject = inject;
+    function injected() {
+        var args = arguments;
+        if (args.length >= 2) {
+            var proto = args[0], prop = args[1], data = args[2], Type = Reflect.getOwnMetadata("design:type", proto, prop);
+            return inject(Type, data)(proto, prop);
         }
         else {
             return function (target, prop, paramIndex) {
@@ -90,6 +107,7 @@ var DI;
         var defaults = Class[__defaults], paramTypes = Reflect.getMetadata("design:paramtypes", Class), args = [];
         if (!paramTypes)
             paramTypes = Object.assign([], defaults, data);
+        Object.assign(paramTypes, Class[__paramTypes]);
         for (var i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 var _data = Class[__paramData] && Class[__paramData][i];

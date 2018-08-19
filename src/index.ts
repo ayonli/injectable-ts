@@ -15,7 +15,8 @@ process.emitWarning = process.emitWarning || function emitWarning(warning: strin
 namespace DI {
     const __injectable = Symbol("__injectable");
     const __defaults = Symbol("__defaults");
-    const __dependent = Symbol("__dependent")
+    const __dependent = Symbol("__dependent");
+    const __paramTypes = Symbol("__paramTypes");
     const __paramData = Symbol("__paramData");
 
     interface Class extends Function {
@@ -55,8 +56,8 @@ namespace DI {
      * Sets the class to be injectable as a dependency.
      * @param defaults [deprecated] The default data passed to the class constructor.
      */
-    export function injectable<T>(defaults?: any[]): (Class: T) => void;
-    export function injectable<T>(Class: T, defaults?: any[]): void;
+    export function injectable(defaults?: any[]): (Class: Class) => void;
+    export function injectable(Class: Class, defaults?: any[]): void;
     export function injectable(): any {
         let args = arguments;
 
@@ -69,7 +70,7 @@ namespace DI {
 
                 if (!warningEmitted) {
                     process.emitWarning("setting default data via 'injectable()'"
-                        + " is deprecated, please set data via 'injected()'" 
+                        + " is deprecated, please set data via 'injected()'"
                         + " instead.");
                     warningEmitted = true;
                 }
@@ -94,6 +95,38 @@ namespace DI {
         }
     }
 
+    export function inject(Class: Class, data?: any[]) {
+        return (target: any, prop?: string, paramIndex?: number) => {
+            if (typeof Class != "function")
+                throw new TypeError("The dependency must be a class.");
+            else if (!Class[__injectable])
+                throw new TypeError("The given class is not injectable.");
+
+            if (prop && paramIndex === undefined) {
+                // decorate property
+                let _prop = Symbol(prop);
+                Object.defineProperty(target, prop, {
+                    enumerable: true,
+                    get() {
+                        if (!this[_prop])
+                            this[_prop] = getInstance.call(this, Class, data);
+
+                        return this[_prop];
+                    },
+                    set(instance) {
+                        this[_prop] = instance;
+                    }
+                });
+            } else if (!prop && paramIndex !== undefined) {
+                // decorate constructor parameter
+                target[__paramTypes] = target[__paramTypes] || [];
+                target[__paramTypes][paramIndex] = Class;
+                target[__paramData] = target[__paramData] || [];
+                target[__paramData][paramIndex] = data;
+            }
+        }
+    }
+
     /** Sets the property to be dependent to it's type. */
     export function injected(proto: any, prop: string): void;
     /**
@@ -109,21 +142,7 @@ namespace DI {
                 data = args[2],
                 Type: Class = Reflect.getOwnMetadata("design:type", proto, prop);
 
-            if (typeof Type == "function" && Type[__injectable]) {
-                let _prop = Symbol(prop);
-                Object.defineProperty(proto, prop, {
-                    enumerable: true,
-                    get() {
-                        if (!this[_prop])
-                            this[_prop] = getInstance.call(this, <any>Type, data);
-
-                        return this[_prop];
-                    },
-                    set(instance) {
-                        this[_prop] = instance;
-                    }
-                });
-            }
+            return inject(Type, data)(proto, prop);
         } else {
             return (target: any, prop?: string, paramIndex?: number) => {
                 if (prop && paramIndex === undefined) {
@@ -155,6 +174,9 @@ namespace DI {
             args: any[] = [];
 
         if (!paramTypes) paramTypes = Object.assign([], defaults, data);
+        
+        // Merger parameter types and the types passed to `inject()`.
+        Object.assign(paramTypes, Class[__paramTypes]);
 
         for (let i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {

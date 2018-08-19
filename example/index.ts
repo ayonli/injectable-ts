@@ -1,6 +1,5 @@
 import "source-map-support/register";
 import * as assert from "assert";
-// The are only three new keywords in the this package.
 const { injectable, injected, getInstance } = require("..");
 
 @injectable // Set the class to be injectable
