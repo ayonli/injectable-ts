@@ -40,9 +40,9 @@ var DI;
         }
     }
     DI.injectable = injectable;
-    function injected(proto, prop, desc) {
+    function injected(proto, prop) {
         var Type = Reflect.getOwnMetadata("design:type", proto, prop);
-        if (!desc && typeof Type == "function" && Type[__injectable]) {
+        if (typeof Type == "function" && Type[__injectable]) {
             var _prop_1 = Symbol(prop);
             Object.defineProperty(proto, prop, {
                 enumerable: true,
@@ -65,7 +65,7 @@ var DI;
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
             }
-            else if (defaults && defaults[i]) {
+            else if (defaults[i] !== undefined) {
                 args[i] = defaults[i];
             }
             else {

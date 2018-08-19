@@ -75,10 +75,10 @@ namespace DI {
     }
 
     /** Sets the property to be dependent to it's type. */
-    export function injected(proto: any, prop: string, desc?: PropertyDescriptor): void {
+    export function injected(proto: any, prop: string): void {
         let Type: Class = Reflect.getOwnMetadata("design:type", proto, prop);
 
-        if (!desc && typeof Type == "function" && Type[__injectable]) {
+        if (typeof Type == "function" && Type[__injectable]) {
             let _prop = Symbol(prop);
             Object.defineProperty(proto, prop, {
                 enumerable: true,
@@ -113,7 +113,7 @@ namespace DI {
         for (let i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
-            } else if (defaults && defaults[i]) {
+            } else if (defaults[i] !== undefined) {
                 args[i] = defaults[i];
             } else {
                 args[i] = undefined;
