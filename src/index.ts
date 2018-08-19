@@ -95,6 +95,11 @@ namespace DI {
         }
     }
 
+    /**
+     * Sets the property/parameter to be a dependency according to the given type.
+     * @param Class The class you want to get instance of.
+     * @param data The data passed to the dependency when instantiating.
+     */
     export function inject(Class: Class, data?: any[]) {
         return (target: any, prop?: string, paramIndex?: number) => {
             if (typeof Class != "function")
@@ -127,10 +132,10 @@ namespace DI {
         }
     }
 
-    /** Sets the property to be dependent to it's type. */
+    /** Sets the property/parameter to be a dependency according to it's type. */
     export function injected(proto: any, prop: string): void;
     /**
-     * @param data The data passed to the constructor when instantiating.
+     * @param data The data passed to the dependency when instantiating.
      */
     export function injected(data: any[]): (target: any, prop?: string, paramIndex?: number) => void
     export function injected(): any {
