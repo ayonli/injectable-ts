@@ -1,6 +1,7 @@
-// This package support classes written in ES5 style, which is a `function`,
-// the following classes will be compiled to `ES5` standard, and the assertions 
-// should pass.
+// All the dependencies defined as property are lazy-load, which means only if 
+// you call them, otherwise they will not be injected, that also means you can 
+// use them in the constructor as the dependencies defined in the constructor 
+// parameters.
 
 import "source-map-support/register";
 import * as assert from "assert";
