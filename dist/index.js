@@ -33,7 +33,7 @@ var DI;
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
                 args[i] = getInstance(paramTypes[i]);
             }
-            else if (defaults && defaults[i]) {
+            else if (defaults && defaults[i] !== undefined) {
                 args[i] = defaults[i];
             }
             else {
