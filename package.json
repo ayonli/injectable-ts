@@ -1,6 +1,6 @@
 {
     "name": "injectable-ts",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "The simplest way of Dependency Injection for TypeScript.",
     "main": "dist/index.js",
     "types": "src/index.ts",
@@ -29,10 +29,10 @@
     "homepage": "https://github.com/hyurl/injectable-ts#readme",
     "dependencies": {
         "@types/node": "^10.7.1",
-        "reflect-metadata": "^0.1.12"
+        "reflect-metadata": "^0.1.12",
+        "tslib": "^1.9.3"
     },
     "devDependencies": {
-        "source-map-support": "^0.5.8",
-        "tslib": "^1.9.3"
+        "source-map-support": "^0.5.8"
     }
 }
