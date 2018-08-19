@@ -132,7 +132,7 @@ namespace DI {
         }
     }
 
-    /** Sets the property/parameter to be a dependency according to it's type. */
+    /** Sets the property/parameter to be a dependency according to its type. */
     export function injected(proto: any, prop: string): void;
     /**
      * @param data The data passed to the dependency when instantiating.

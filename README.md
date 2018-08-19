@@ -170,7 +170,7 @@ property definition.
 ## Inheritance Support
 
 If a class is decorated with `@injectable`, or it extends the base class 
-`Injectable`, then itself and it's offspring are all injectable to other 
+`Injectable`, then itself and its offspring are all injectable to other 
 classes. Please check the [example](./example-inheritance/index.ts).
 
 Any injectable class, when injected to a instance, it will carry a read-only 

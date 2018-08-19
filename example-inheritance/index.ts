@@ -1,4 +1,4 @@
-// If a class is decorated with `@injectable`, then itself and it's offspring
+// If a class is decorated with `@injectable`, then itself and its offspring
 // are all injectable to other classes.
 // In this example, since `tsc` will not trigger `emitDecoratorMetadata` option
 // if there is no decorator in a class, so the bellowing classes without 
