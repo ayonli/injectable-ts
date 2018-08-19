@@ -32,35 +32,46 @@ var C = (function () {
         injected,
         tslib_1.__metadata("design:type", B)
     ], C.prototype, "b", void 0);
+    tslib_1.__decorate([
+        injected(["ABCD"]),
+        tslib_1.__metadata("design:type", A)
+    ], C.prototype, "a", void 0);
     C = tslib_1.__decorate([
         injectable
     ], C);
     return C;
 }());
 var D = (function () {
-    function D(b, c) {
-        this.b = b;
-        this.c = c;
+    function D(a, str) {
+        this.a = a;
+        this.str = str;
     }
     tslib_1.__decorate([
         injected,
-        tslib_1.__metadata("design:type", A)
-    ], D.prototype, "a", void 0);
+        tslib_1.__metadata("design:type", B)
+    ], D.prototype, "b", void 0);
+    tslib_1.__decorate([
+        injected,
+        tslib_1.__metadata("design:type", C)
+    ], D.prototype, "c", void 0);
     D = tslib_1.__decorate([
         injectable,
-        tslib_1.__metadata("design:paramtypes", [B, C])
+        tslib_1.__param(0, injected(["AB"])),
+        tslib_1.__metadata("design:paramtypes", [A, String])
     ], D);
     return D;
 }());
-var d = getInstance(D);
+var d = getInstance(D, [void 0, "ASDF"]);
 assert.ok(d instanceof D);
+assert.equal(d.str, "ASDF");
 assert.ok(d.a instanceof A);
+assert.equal(d.a.str, "AB");
 assert.ok(d.b instanceof B);
 assert.ok(d.c instanceof C);
 assert.ok(d.c.b instanceof B);
 assert.ok(d.c.b.a instanceof A);
-assert.ok(d.c.b.a.str == "ABC");
-assert.ok(d.c.b.a.str2 === undefined);
+assert.equal(d.c.b.a.str, "ABC");
+assert.equal(d.c.b.a.str2, undefined);
 var E = (function () {
     function E(str, str2) {
         if (str2 === void 0) { str2 = "CDA"; }
@@ -69,12 +80,13 @@ var E = (function () {
     }
     return E;
 }());
-injectable(E, ["ABC"]);
+injectable(E);
 var F = (function () {
-    function F() {
+    function F(str) {
+        this.str = str;
     }
     tslib_1.__decorate([
-        injected,
+        injected(["ABC"]),
         tslib_1.__metadata("design:type", E)
     ], F.prototype, "e", void 0);
     return F;
@@ -82,7 +94,7 @@ var F = (function () {
 var f = getInstance(F);
 assert.ok(f instanceof F);
 assert.ok(f.e instanceof E);
-assert.ok(f.e.str == "ABC");
-assert.ok(f.e.str2 == "CDA");
+assert.equal(f.e.str, "ABC");
+assert.equal(f.e.str2, "CDA");
 console.log("#### OK ####");
 //# sourceMappingURL=index.js.map

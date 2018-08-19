@@ -35,12 +35,12 @@ import * as assert from "assert";
 // the are only three new keywords in the this package.
 import { injectable, injected, getInstance } from "./index";
 
-@injectable // sets the class to be injectable
+@injectable // Set the class to be injectable
 class A {
     str: string;
     str2: string;
 
-    // set default data in the parameter.
+    // Set default data in the parameter.
     constructor(str: string = "ABC") {
         this.str = str;
     }
@@ -50,8 +50,7 @@ class A {
 class B {
     a: A;
 
-    // because this class has its own constructor, so its parameter will be 
-    // auto injected  with required dependency.
+    // The constructor parameters will be auto-injected with required dependency.
     constructor(a: A) {
         this.a = a;
     }
@@ -59,32 +58,56 @@ class B {
 
 @injectable
 class C {
-    // this class doesn't have its own constructor, so use `injected` to define
-    // the dependency.
+    // Instead define dependencies in the constructor, using `injected` to define
+    // the dependency on the property would be more efficient and good-looking.
     @injected
     b: B;
+
+    // You can pass data to `injected()`, the data will be used as arguments 
+    // when instantiating the dependency class.
+    @injected(["ABCD"])
+    a: A;
 }
 
-@injectable
-// using both constructor injection and `injected` on property are supported, 
+// Using both constructor injection and `injected` on property are supported, 
 // but DO NOT set them to the same property.
+@injectable
 class D {
-    @injected
     a: A;
 
-    constructor(public b: B, public c: C) { }
+    @injected
+    b: B;
+
+    @injected
+    c: C;
+
+    str: string;
+
+    // You can even use `injected()` here to set data for the dependency, BUT 
+    // should remember the dependencies in the constructor doesn't required 
+    // specifying `injected`, them will be injected anyway. And you must not 
+    // directly using `@injected` in the constructor, must use it as a function 
+    // with data.
+    constructor(@injected(["AB"]) a: A, str: string) {
+        this.a = a;
+        this.str = str;
+    }
 }
 
-var d = getInstance(D);
+// Get instance and pass data to the constructor, since `a` will be 
+// auto-injected, so pass it `undefined` instead.
+var d: D = getInstance(D, [void 0, "ASDF"]);
 
 assert.ok(d instanceof D);
+assert.equal(d.str, "ASDF");
 assert.ok(d.a instanceof A);
+assert.equal(d.a.str, "AB");
 assert.ok(d.b instanceof B);
 assert.ok(d.c instanceof C);
 assert.ok(d.c.b instanceof B);
 assert.ok(d.c.b.a instanceof A);
-assert.ok(d.c.b.a.str == "ABC");
-assert.ok(d.c.b.a.str2 === undefined);
+assert.equal(d.c.b.a.str, "ABC");
+assert.equal(d.c.b.a.str2, undefined);
 
 class E {
     str: string;
@@ -94,64 +117,32 @@ class E {
     }
 }
 
-// calling `injectable` as a function and passing the class will be very useful 
-// to make previous written code (or  third party packages) injectable.
-// this example only sets the default data of `str`, `str2` will remain as `CDA`.
-injectable(E, ["ABC"]);
+// Calling `injectable()` as a function and passing the class will be very 
+// useful to make previous written code (or third party packages) injectable.
+injectable(E);
 
-// even if you don't set this class injectable, it still could be used by 
+// Even if you don't set this class injectable, it still could be used by 
 // `getInstance`. (but it could not be injected to other classes.)
 class F {
-    @injected
+    // Set data for parameter `str`, and `str2` will remain 'CDA'.
+    @injected(["ABC"])
     e: E;
+
+    str: string;
+
+    constructor(str: string) {
+        this.str = str;
+    }
 }
 
-var f = getInstance(F);
+var f: F = getInstance(F);
 
 assert.ok(f instanceof F);
 assert.ok(f.e instanceof E);
-assert.ok(f.e.str == "ABC");
-assert.ok(f.e.str2 == "CDA");
+assert.equal(f.e.str, "ABC");
+assert.equal(f.e.str2, "CDA");
 
 console.log("#### OK ####"); // will output #### OK ####
-```
-
-## More About Default Data
-
-When you pass default data to `injectable()`, the order should be equal to the 
-constructor's parameters, if the corresponding parameter doesn't have default 
-data, then `undefined` should be passed. Default data should remain dependencies
-`undefined` because they will always be injected with dependency instances, 
-unless the dependency could not be found.
-
-Although you are allowed to set default data by passing them to `injectable()`, 
-but it's not a recommended way, since you already can set them in the 
-constructor definition. But, if you want to make those classes that are not 
-decorated with `@injectable`, say a class from a third party package, injectable,
-it would be very useful to use `injectable()` with default data to do so.
-
-```typescript
-// The way to set dafault data in this class is recommended.
-@injectable
-class A {
-    str: string; // or juest set here
-
-    constructor(str = "default string") {
-        this.str = str;
-    }
-}
-
-// But the way in this class is not recommended, although it works the same in 
-// most situations. Except with inheritance, which may cause problem if the 
-// child class doesn't accept the same parameter types as the super class do.
-@injectable(["default string"])
-class B {
-    str: string;
-
-    constructor(str) {
-        this.str = str;
-    }
-}
 ```
 
 ## Difference Between Constructor Injection And Property Injection
@@ -163,6 +154,12 @@ injected. Both these dependencies are available in the constructor and any where
 inside or outside (must be `public`) the class. 
 Please check the [example](./example-lazyload/index.ts).
 
+Worth mentioned that since the dependencies defined in the constructor are 
+instantiated before the current class, so there would not be the `dependent` 
+property (described bellow) available, because the instantiation hasn't been 
+finished yet. It's a very good habit to always define dependencies on the 
+property definition. 
+
 ## Inheritance Support
 
 If a class is decorated with `@injectable`, or it extends the base class 
@@ -172,3 +169,28 @@ classes. Please check the [example](./example-inheritance/index.ts).
 Any injectable class, when injected to a instance, it will carry a read-only 
 property `dependent`, which reference to the that instance, so you can always 
 know the current instance has been injected into what dependent target.
+
+```typescript
+class A extends Injectable {
+    constructor() {
+        if (this.dependent)
+            console.log("The current instance is a dependency of:", this.dependent.constructor.name);
+    }
+}
+
+class B extends Injectable {
+    @injected
+    a: A;
+}
+
+class C extends Injectable {
+    constructor(public a: A) { }
+}
+
+var b = getInstance(B);
+var c = getInstance(C);
+
+// Will only output: 'The current instance is a dependency of: B'.
+// Because the dependencies defined in the constructor doesn't have the property
+// 'dependent'.
+```

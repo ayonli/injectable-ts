@@ -1,5 +1,12 @@
 import "reflect-metadata";
 
+let warningEmitted = false;
+
+process.emitWarning = process.emitWarning || function emitWarning(warning: string | Error, name?: string) {
+    warning = warning instanceof Error ? warning.toString() : ((name || "Warning") + ": " + warning);
+    console.warn(warning);
+}
+
 /**
  * The simplest Dependency Injection framework for TypeScript.
  * This package doesn't require setting the dependency class to any function,
@@ -8,7 +15,8 @@ import "reflect-metadata";
 namespace DI {
     const __injectable = Symbol("__injectable");
     const __defaults = Symbol("__defaults");
-    const __dependent = Symbol("__dependent");
+    const __dependent = Symbol("__dependent")
+    const __paramData = Symbol("__paramData");
 
     interface Class extends Function {
         [__injectable]?: boolean;
@@ -34,28 +42,40 @@ namespace DI {
      */
     @injectable
     export class Injectable implements Injectable {
-        /** Gets a new instance and perform dependency injection automatically. */
-        static getInstance() {
-            return getInstance(<any>this);
+        /** 
+         * Gets a new instance and perform dependency injection automatically.
+         * @param data The data passed to the constructor when instantiating.
+         */
+        static getInstance(data?: any[]) {
+            return getInstance(<any>this, data);
         }
     }
 
     /**
      * Sets the class to be injectable as a dependency.
-     * @param defaults The default data passed to the class Class.
+     * @param defaults [deprecated] The default data passed to the class constructor.
      */
     export function injectable<T>(defaults?: any[]): (Class: T) => void;
     export function injectable<T>(Class: T, defaults?: any[]): void;
     export function injectable(): any {
         let args = arguments;
+
         if (typeof args[0] == "function") { // signature 2
             let Class: Class = args[0];
             Class[__injectable] = true;
 
-            if (args[1])
+            if (args[1]) {
                 Class[__defaults] = args[1];
 
-            // sets the read-only property `dependent` for the instance, the 
+                if (!warningEmitted) {
+                    process.emitWarning("setting default data via 'injectable()'"
+                        + " is deprecated, please set data via 'injected()'" 
+                        + " instead.");
+                    warningEmitted = true;
+                }
+            }
+
+            // Sets the read-only property `dependent` for the instance, the 
             // dependent will be temporarily stored in the constructor, and when
             // accessing to it, remove immediately and restore it in the 
             // instance.
@@ -75,23 +95,46 @@ namespace DI {
     }
 
     /** Sets the property to be dependent to it's type. */
-    export function injected(proto: any, prop: string): void {
-        let Type: Class = Reflect.getOwnMetadata("design:type", proto, prop);
+    export function injected(proto: any, prop: string): void;
+    /**
+     * @param data The data passed to the constructor when instantiating.
+     */
+    export function injected(data: any[]): (target: any, prop?: string, paramIndex?: number) => void
+    export function injected(): any {
+        let args = arguments;
 
-        if (typeof Type == "function" && Type[__injectable]) {
-            let _prop = Symbol(prop);
-            Object.defineProperty(proto, prop, {
-                enumerable: true,
-                get() {
-                    if (!this[_prop])
-                        this[_prop] = getInstance(<any>Type, this);
+        if (args.length >= 2) {
+            let proto = args[0],
+                prop = args[1],
+                data = args[2],
+                Type: Class = Reflect.getOwnMetadata("design:type", proto, prop);
 
-                    return this[_prop];
-                },
-                set(instance) {
-                    this[_prop] = instance;
+            if (typeof Type == "function" && Type[__injectable]) {
+                let _prop = Symbol(prop);
+                Object.defineProperty(proto, prop, {
+                    enumerable: true,
+                    get() {
+                        if (!this[_prop])
+                            this[_prop] = getInstance.call(this, <any>Type, data);
+
+                        return this[_prop];
+                    },
+                    set(instance) {
+                        this[_prop] = instance;
+                    }
+                });
+            }
+        } else {
+            return (target: any, prop?: string, paramIndex?: number) => {
+                if (prop && paramIndex === undefined) {
+                    // decorate property
+                    injected.call(undefined, target, prop, args[0]);
+                } else if (!prop && paramIndex !== undefined) {
+                    // decorate constructor parameter
+                    target[__paramData] = target[__paramData] || [];
+                    target[__paramData][paramIndex] = args[0];
                 }
-            });
+            };
         }
     }
 
@@ -99,32 +142,38 @@ namespace DI {
      * Gets a instance according to the given class, injects dependencies 
      * automatically and recursively.
      * @param Class The class you want to get instance of.
+     * @param data The data passed to the constructor when instantiating.
      */
-    export function getInstance<T>(Class: new (...args) => T, dependent?: any): T {
+    export function getInstance<T>(Class: new (...args) => T, data?: any[]): T {
         let instance: T = null;
 
         // The program will lookup constructor signature, and try to inject 
         // dependencies accordingly, if a parameter doesn't have dependency, or
         // the dependency can not be found, then `undefined` will be passed.
-        let defaults: any[] = Class[__defaults] || [],
-            paramTypes: any[] = Reflect.getMetadata("design:paramtypes", Class) || defaults,
+        let defaults: any[] = Class[__defaults],
+            paramTypes: any[] = Reflect.getMetadata("design:paramtypes", Class),
             args: any[] = [];
+
+        if (!paramTypes) paramTypes = Object.assign([], defaults, data);
 
         for (let i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
-                args[i] = getInstance(paramTypes[i]);
-            } else if (defaults[i] !== undefined) {
+                let _data = Class[__paramData] && Class[__paramData][i];
+                args[i] = getInstance(paramTypes[i], _data);
+            } else if (data && data[i] !== undefined) {
+                args[i] = data[i];
+            } else if (defaults && defaults[i] !== undefined) {
                 args[i] = defaults[i];
             } else {
                 args[i] = undefined;
             }
         }
 
-        // temporarily store the dependent in the class, and remove it 
+        // Temporarily store the dependent in the class, and remove it 
         // immediately after the instance access to it. 
-        Class[__dependent] = dependent;
+        Class[__dependent] = this;
         instance = new Class(...args);
-        instance["dependent"]; // access to the dependent so to remove it.
+        instance["dependent"]; // Access to the dependent so to remove it.
 
         return instance;
     }

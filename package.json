@@ -1,6 +1,6 @@
 {
     "name": "injectable-ts",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "The simplest way of Dependency Injection for TypeScript.",
     "main": "dist/index.js",
     "types": "src/index.ts",
