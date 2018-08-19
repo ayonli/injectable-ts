@@ -33,7 +33,7 @@ Then you can use the functions in your project:
 ```typescript
 import * as assert from "assert";
 // the are only three new keywords in the this package.
-import { injectable, injected, getInstance } from "./index";
+import { injectable, injected, getInstance } from "injectable-ts";
 
 @injectable // Set the class to be injectable
 class A {
