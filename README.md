@@ -50,7 +50,7 @@ class A {
 class B {
     a: A;
 
-    // The constructor parameters will be auto-injected with required dependency.
+    // Constructor parameters will be auto-injected with required dependencies.
     constructor(a: A) {
         this.a = a;
     }
