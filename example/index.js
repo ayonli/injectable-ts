@@ -6,10 +6,11 @@ var assert = require("assert");
 var _a = require(".."), injectable = _a.injectable, injected = _a.injected, getInstance = _a.getInstance;
 var A = (function () {
     function A(str) {
+        if (str === void 0) { str = "ABC"; }
         this.str = str;
     }
     A = tslib_1.__decorate([
-        injectable(["ABC"]),
+        injectable,
         tslib_1.__metadata("design:paramtypes", [String])
     ], A);
     return A;
