@@ -165,7 +165,11 @@ Worth mentioned that since the dependencies defined in the constructor are
 instantiated before the current class, so there would not be the `dependent` 
 property (described bellow) available, because the instantiation hasn't been 
 finished yet. It's a very good habit to always define dependencies on the 
-property definition. 
+property definition.
+
+Another benefit of defining property dependencies is that you don't have to call 
+`getInstance()` to get a instance, but use the common way, calling keyword `new`,
+please check the [example](./example-new/index.ts) to get comfortable with it.
 
 ## Inheritance Support
 

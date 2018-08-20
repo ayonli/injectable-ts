@@ -4,3 +4,4 @@ require("./example");
 if (!isOldNode) require("./example-abstract");
 if (!isOldNode) require("./example-inheritance");
 if (!isOldNode) require("./example-lazyload");
+if (!isOldNode) require("./example-new");
