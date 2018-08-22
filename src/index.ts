@@ -111,7 +111,6 @@ namespace DI {
                 // decorate property
                 let _prop = Symbol(prop);
                 Object.defineProperty(target, prop, {
-                    enumerable: true,
                     get() {
                         if (!this[_prop])
                             this[_prop] = getInstance.call(this, Class, data);

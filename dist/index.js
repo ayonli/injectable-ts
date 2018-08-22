@@ -63,7 +63,6 @@ var DI;
             if (prop && paramIndex === undefined) {
                 var _prop_1 = Symbol(prop);
                 Object.defineProperty(target, prop, {
-                    enumerable: true,
                     get: function () {
                         if (!this[_prop_1])
                             this[_prop_1] = getInstance.call(this, Class, data);
