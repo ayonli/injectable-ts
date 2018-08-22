@@ -205,3 +205,38 @@ var c = getInstance(C);
 // Because the dependencies defined in the constructor doesn't have the property
 // 'dependent'.
 ```
+
+## Initiative Injection
+
+Sometimes a already defined class, e.g. from a third party package, that you 
+want to add additional abilities onto it when using, commonly you can just 
+define a new class to extends it, but here I would say, you can inject 
+dependencies to it instead. Check the following example:
+
+```typescript
+import { SomeClass } from "somewhere";
+import { injectable, inject } from "injectable-ts";
+
+@injectable
+class Service {
+    // ....
+}
+
+// `inject()` is a pure JavaScript function which returns a new function that 
+// accepts a class constructor and a property name, this code will inject 
+// `Service` into SomeClass (you can pass the second arguments `data: any[]` to
+// inject() for instantiation as well).
+inject(Service)(SomeClass, "service");
+
+// Since TypeScript supports declaration merging, so you can add the property 
+// to the class declaration and seem it as a interface.
+declare interface SomeClass {
+    service: Service;
+}
+
+// when you accessing `service`, it will return a new Service instance as 
+// expected.
+
+var instance = new SomeClass();
+console.log(instance.service instanceof Service); // => true
+```
