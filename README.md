@@ -223,10 +223,10 @@ class Service {
 }
 
 // `inject()` is a pure JavaScript function which returns a new function that 
-// accepts a class constructor and a property name.
+// accepts a class prototype and a property name.
 // This code will inject `Service` into SomeClass (you can pass the second 
 // argument `data: any[]` to inject() for instantiation as well).
-inject(Service)(SomeClass, "service");
+inject(Service)(SomeClass.prototype, "service");
 
 // Since TypeScript supports declaration merging, so you can add the property 
 // to the class declaration and consider it as an interface.
