@@ -240,3 +240,11 @@ declare interface SomeClass {
 var instance = new SomeClass();
 console.log(instance.service instanceof Service); // => true
 ```
+
+## Support of JavaScript
+
+Apparently this package works with JavaScript perfectly, with exception of 
+constructor injection (since JavaScript doesn't have type definition) and 
+decorators, but the remaining features are all perfect for JavaScript, instead 
+of using decorators, calling `injetable()` and `inject()` directly, and don't 
+use `injected`, which you've seen a lot from above examples.
