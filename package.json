@@ -33,6 +33,7 @@
         "tslib": "^1.9.3"
     },
     "devDependencies": {
-        "source-map-support": "^0.5.8"
+        "source-map-support": "^0.5.8",
+        "ts-node": "^7.0.1"
     }
 }
