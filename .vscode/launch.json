@@ -8,16 +8,17 @@
             "type": "node",
             "request": "launch",
             "name": "启动调试",
-            "protocol": "inspector",
-            "args": [
-                "${relativeFile}"
-            ],
-            "cwd": "${workspaceRoot}",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register"
-            ],
-            "internalConsoleOptions": "openOnSessionStart"
+            "protocol": "auto",
+            "program": "${workspaceFolder}/test",
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/dist/*.js",
+                "${workspaceFolder}/example/*.js",
+                "${workspaceFolder}/example-abstract/*.js",
+                "${workspaceFolder}/example-inheritance/*.js",
+                "${workspaceFolder}/example-lazyload/*.js",
+                "${workspaceFolder}/example-new/*.js",
+            ]
         }
     ]
 }
