@@ -1,4 +1,4 @@
-// This script won't import 'driver.js' when compile since it's an interface, 
+// This script won't import 'car.js' when compile since it's an interface, 
 // thus keep the module clean. the script will be import in 'index.js'.
 
 import { Car } from "./car";

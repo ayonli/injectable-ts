@@ -241,7 +241,7 @@ var instance = new SomeClass();
 console.log(instance.service instanceof Service); // => true
 ```
 
-## Injection Using a String ID
+## Injection Using String ID
 
 This package is aim to inject available classes, but sometimes it's not the case.
 Consider the situation of circular imports, if you inject a *class* that isn't 
