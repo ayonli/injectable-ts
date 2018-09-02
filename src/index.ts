@@ -53,14 +53,13 @@ namespace DI {
      * Sets the class to be injectable as a dependency.
      * @param defaults [deprecated] The default data passed to the class constructor.
      */
-    export function injectable(): (Class: Class) => void;
     export function injectable(Class: Class): void;
     export function injectable(id: string): (Class: Class) => void;
     export function injectable(id: string, Class: Class): void;
     export function injectable(): any {
         let args = Array.prototype.slice.apply(arguments);
 
-        if (typeof args[0] == "function") { // signature 2
+        if (typeof args[0] == "function") { // signature 1
             let Class: Class = args[0];
             Class[__injectable] = true;
 
@@ -81,15 +80,13 @@ namespace DI {
         } else if (typeof args[0] == "string") {
             let id: string = args[0];
 
-            if (typeof args[1] == "function") { // signature 4
+            if (typeof args[1] == "function") { // signature 3
                 let Class: Class = args[1];
                 Container[id] = Class;
                 return injectable(Class);
-            } else { // signature 3
+            } else { // signature 2
                 return (Class: Class) => injectable(id, Class);
             }
-        } else { // signature 1
-            return (Class: Class) => injectable(Class);
         }
     }
 
@@ -169,8 +166,8 @@ namespace DI {
      * @param Class The class you want to get instance of.
      * @param data The data passed to the constructor when instantiating.
      */
-    export function getInstance<T>(id: string, data?: any[]): T;
     export function getInstance<T>(Class: new (...args) => T, data?: any[]): T;
+    export function getInstance<T>(id: string, data?: any[]): T;
     export function getInstance<T>(): T {
         let instance: T = null,
             data: any[] = arguments[1],

@@ -50,9 +50,6 @@ var DI;
                 return function (Class) { return injectable(id_1, Class); };
             }
         }
-        else {
-            return function (Class) { return injectable(Class); };
-        }
     }
     DI.injectable = injectable;
     function inject(Class, data) {
