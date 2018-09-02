@@ -1,7 +1,6 @@
 "use strict";
 var tslib_1 = require("tslib");
 require("reflect-metadata");
-var warningEmitted = false;
 process.emitWarning = process.emitWarning || function emitWarning(warning, name) {
     warning = warning instanceof Error ? warning.toString() : ((name || "Warning") + ": " + warning);
     console.warn(warning);
@@ -9,10 +8,10 @@ process.emitWarning = process.emitWarning || function emitWarning(warning, name)
 var DI;
 (function (DI) {
     var __injectable = Symbol("__injectable");
-    var __defaults = Symbol("__defaults");
     var __dependent = Symbol("__dependent");
     var __paramTypes = Symbol("__paramTypes");
     var __paramData = Symbol("__paramData");
+    var Container = {};
     var Injectable = (function () {
         function Injectable() {
         }
@@ -26,19 +25,10 @@ var DI;
     }());
     DI.Injectable = Injectable;
     function injectable() {
-        var args = arguments;
+        var args = Array.prototype.slice.apply(arguments);
         if (typeof args[0] == "function") {
             var Class = args[0];
             Class[__injectable] = true;
-            if (args[1]) {
-                Class[__defaults] = args[1];
-                if (!warningEmitted) {
-                    process.emitWarning("setting default data via 'injectable()'"
-                        + " is deprecated, please set data via 'injected()'"
-                        + " instead.");
-                    warningEmitted = true;
-                }
-            }
             Object.defineProperty(Class.prototype, "dependent", {
                 get: function () {
                     if (!this[__dependent] && this.constructor[__dependent]) {
@@ -49,23 +39,36 @@ var DI;
                 }
             });
         }
+        else if (typeof args[0] == "string") {
+            var id_1 = args[0];
+            if (typeof args[1] == "function") {
+                var Class = args[1];
+                Container[id_1] = Class;
+                return injectable(Class);
+            }
+            else {
+                return function (Class) { return injectable(id_1, Class); };
+            }
+        }
         else {
-            return function (Class) { return injectable(Class, args[0]); };
+            return function (Class) { return injectable(Class); };
         }
     }
     DI.injectable = injectable;
     function inject(Class, data) {
+        if (typeof Class != "function" && typeof Class != "string")
+            throw new TypeError("The dependency must be a class constructor or a string id.");
+        else if (typeof Class == "function" && !Class[__injectable])
+            throw new TypeError("The given class is not injectable.");
         return function (target, prop, paramIndex) {
-            if (typeof Class != "function")
-                throw new TypeError("The dependency must be a class.");
-            else if (!Class[__injectable])
-                throw new TypeError("The given class is not injectable.");
             if (prop && paramIndex === undefined) {
                 var _prop_1 = Symbol(prop);
                 Object.defineProperty(target, prop, {
                     get: function () {
-                        if (!this[_prop_1])
-                            this[_prop_1] = getInstance.call(this, Class, data);
+                        if (!this[_prop_1]) {
+                            Class = typeof Class == "function" ? Class : Container[Class];
+                            this[_prop_1] = Class ? getInstance.call(this, Class, data) : null;
+                        }
                         return this[_prop_1];
                     },
                     set: function (instance) {
@@ -101,11 +104,17 @@ var DI;
         }
     }
     DI.injected = injected;
-    function getInstance(Class, data) {
-        var instance = null;
-        var defaults = Class[__defaults], paramTypes = Reflect.getMetadata("design:paramtypes", Class), args = [];
+    function getInstance() {
+        var instance = null, data = arguments[1], Class;
+        if (typeof arguments[0] == "string") {
+            Class = Container[arguments[0]];
+        }
+        else {
+            Class = arguments[0];
+        }
+        var paramTypes = Reflect.getMetadata("design:paramtypes", Class), args = [];
         if (!paramTypes)
-            paramTypes = Object.assign([], defaults, data);
+            paramTypes = Object.assign([], data);
         Object.assign(paramTypes, Class[__paramTypes]);
         for (var i in paramTypes) {
             if (typeof paramTypes[i] == "function" && paramTypes[i][__injectable]) {
@@ -114,9 +123,6 @@ var DI;
             }
             else if (data && data[i] !== undefined) {
                 args[i] = data[i];
-            }
-            else if (defaults && defaults[i] !== undefined) {
-                args[i] = defaults[i];
             }
             else {
                 args[i] = undefined;

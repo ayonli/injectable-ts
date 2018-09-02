@@ -241,6 +241,17 @@ var instance = new SomeClass();
 console.log(instance.service instanceof Service); // => true
 ```
 
+## Injection Using a String ID
+
+This package is aim to inject available classes, but sometimes it's not the case.
+Consider the situation of circular imports, if you inject a *class* that isn't 
+already available (not finishing initiation, its value would be `undefined`),
+you'll be facing troubles. In this case, you will need to inject the 
+dependencies via interfaces and string ids, and do truly import in an entry 
+script that ensures the all dependency files will be imported.
+
+Please check the [example](./example-id/index.ts).
+
 ## Support of JavaScript
 
 Apparently this package works with JavaScript perfectly, with exception of 
